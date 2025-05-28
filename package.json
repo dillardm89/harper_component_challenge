@@ -1,6 +1,16 @@
 {
-  "name": "application-template",
+  "name": "harper_component_challenge",
   "version": "1.0.0",
-  "description": "A template for building HarperDB applications",
-  "type": "module"
+  "description": "Harper Component Challenge",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dillardm89/harper_component_challenge.git"
+  },
+  "keywords": [],
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/dillardm89/harper_component_challenge/issues"
+  },
+  "homepage": "https://github.com/dillardm89/harper_component_challenge#readme"
 }
