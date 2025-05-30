@@ -1,0 +1,182 @@
+import { tables } from "harperdb";
+import { faker } from "@faker-js/faker";
+import { SeedUsers } from "../src/controllers/resources";
+
+// Mock dependencies
+jest.mock('harperdb', () => {
+    class MockTable {
+        constructor(identifier?: any, source?: any) {
+        }
+
+        static post = jest.fn().mockResolvedValue({});
+    }
+
+    return {
+        tables: {
+            User: MockTable,
+        },
+    };
+});
+
+jest.mock("@faker-js/faker", () => ({
+    faker: {
+        person: {
+            firstName: jest.fn(),
+            lastName: jest.fn()
+        },
+        internet: {
+            email: jest.fn()
+        },
+        number: {
+            int: jest.fn()
+        },
+        datatype: {
+            boolean: jest.fn()
+        }
+    }
+}));
+
+const mockTables = tables as jest.Mocked<typeof tables>;
+
+describe("SeedUsers", () => {
+    let seedUsersInstance: SeedUsers;
+    const { User } = tables;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+
+        jest.mocked(faker.person.firstName).mockClear();
+        jest.mocked(faker.person.lastName).mockClear();
+        jest.mocked(faker.internet.email).mockClear();
+        jest.mocked(faker.number.int).mockClear();
+        jest.mocked(faker.datatype.boolean).mockClear();
+
+        seedUsersInstance = new SeedUsers('test-id', {});
+        (User.post as unknown as jest.Mock).mockResolvedValue({});
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    it("Should seed default 200 users when no count provided", async () => {
+        (User.post as unknown as jest.Mock).mockResolvedValue({ success: true });
+
+        setupFakerMocks();
+        const result = await seedUsersInstance.post({});
+
+        expect(User.post).toHaveBeenCalledTimes(200);
+        expect(result).toEqual({
+            success: true,
+            totalSeeded: 200,
+        });
+    });
+
+    it("Should seed custom count when provided", async () => {
+        const customCount = 50;
+        (User.post as unknown as jest.Mock).mockResolvedValue({ success: true });
+
+        setupFakerMocks();
+
+        const result = await seedUsersInstance.post({ count: String(customCount) });
+
+        expect(User.post).toHaveBeenCalledTimes(customCount);
+        expect(result).toEqual({
+            success: true,
+            totalSeeded: customCount,
+        });
+    });
+
+    it("Should handle large seed counts efficiently", async () => {
+        const largeCount = 1000;
+        (User.post as unknown as jest.Mock).mockResolvedValue({ success: true });
+
+        setupFakerMocks();
+
+        const startTime = Date.now();
+        const result = await seedUsersInstance.post({ count: String(largeCount) });
+
+        const endTime = Date.now();
+        const executionTime = endTime - startTime;
+
+        expect(User.post).toHaveBeenCalledTimes(largeCount);
+        expect(result).toEqual({
+            success: true,
+            totalSeeded: largeCount,
+        });
+
+        expect(executionTime).toBeLessThan(1000); // Should complete within 1 second for mocked operations
+
+        const calls = (User.post as unknown as jest.Mock).mock.calls;
+        expect(calls[0][0].id).toBe(1);
+        expect(calls[largeCount - 1][0].id).toBe(largeCount);
+    });
+
+    it("Should generate unique IDs for each user based on existing count", async () => {
+        const existingUsers = 500;
+        const newUsers = 100;
+        (User.post as unknown as jest.Mock).mockResolvedValue({ success: true });
+
+        setupFakerMocks();
+
+        await seedUsersInstance.post({ count: String(newUsers) });
+
+        const calls = (User.post as unknown as jest.Mock).mock.calls;
+        expect(calls[0][0].id).toBe(existingUsers + 1);
+        expect(calls[newUsers - 1][0].id).toBe(existingUsers + newUsers);
+    });
+
+    it("Should handle database errors during seeding", async () => {
+        const dbError = new Error("Database connection failed");
+
+        setupFakerMocks();
+
+        const result = await seedUsersInstance.post({ count: "10" });
+
+        expect(result).toEqual({
+            success: false,
+            totalSeeded: 0,
+        });
+    });
+
+    it("Should handle errors during user creation", async () => {
+        const insertError = new Error("Insert operation failed");
+        (User.post as unknown as jest.Mock).mockRejectedValue(insertError);
+
+        setupFakerMocks();
+
+        const result = await seedUsersInstance.post({ count: "5" });
+
+        expect(result).toEqual({
+            success: false,
+            totalSeeded: 0,
+        });
+    });
+
+    it("Should handle partial failures during batch operations", async () => {
+        (User.post as unknown as jest.Mock)
+            .mockResolvedValueOnce({ success: true }) // User 1 succeeds
+            .mockResolvedValueOnce({ success: true }) // User 2 succeeds
+            .mockRejectedValueOnce(new Error("Insert failed")) // User 3 fails
+            .mockResolvedValueOnce({ success: true }) // User 4 succeeds
+            .mockRejectedValueOnce(new Error("Another insert failed")); // User 5 fails
+
+        setupFakerMocks();
+
+        const result = await seedUsersInstance.post({ count: "5" });
+
+        expect(result).toEqual({
+            success: false,
+            totalSeeded: 0,
+        });
+    });
+
+    // Helper function to setup faker mocks
+    function setupFakerMocks() {
+        (faker.person.firstName as jest.Mock).mockReturnValue("John");
+        (faker.person.lastName as jest.Mock).mockReturnValue("Doe");
+        (faker.internet.email as jest.Mock).mockReturnValue("john.doe@example.com");
+        (faker.number.int as jest.Mock).mockReturnValue(25);
+        (faker.datatype.boolean as jest.Mock).mockReturnValue(true);
+    }
+});
