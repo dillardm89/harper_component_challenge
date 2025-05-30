@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # HTTP REST interface
 rest: true
 
@@ -8,3 +9,23 @@ graphqlSchema:
 # Loads JavaScript modules
 jsResource:
   files: "./src/controllers/resources.ts"
+=======
+# This is the configuration file for the application.
+# It specifies built-in Harper components that will load the specified feature and files.
+# For more information, see https://docs.harperdb.io/docs/developers/components/built-in
+
+# This provides the HTTP REST interface for all exported resources
+rest: true
+
+# These reads GraphQL schemas to define the schema of database/tables/attributes.
+graphqlSchema:
+  files: 'schema.graphql'
+
+# Loads JavaScript modules such that their exports are exported as resources
+jsResource:
+  files: 'resources.js'
+
+# Serve the static files from the web directory as a web application
+static:
+  files: 'web/*'
+>>>>>>> origin/main
