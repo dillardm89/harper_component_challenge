@@ -2,15 +2,37 @@
   "name": "harper_component_challenge",
   "version": "1.0.0",
   "description": "Harper Component Challenge",
+  "main": "index.js",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dillardm89/harper_component_challenge.git"
   },
-  "keywords": [],
   "author": "",
-  "bugs": {
-    "url": "https://github.com/dillardm89/harper_component_challenge/issues"
+  "scripts": {
+    "lint": "eslint . > src/utils/logs/lint.log || exit 0",
+    "format": "prettier --write .",
+    "test": "jest --silent > src/utils/logs/tests.log 2>&1",
+    "start": "harperdb dev ."
   },
-  "homepage": "https://github.com/dillardm89/harper_component_challenge#readme"
+  "dependencies": {
+    "@faker-js/faker": "^9.8.0",
+    "@harperdb/code-guidelines": "^0.0.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.24",
+    "@typescript-eslint/eslint-plugin": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.0",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.31.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.0"
+  }
 }

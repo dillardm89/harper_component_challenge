@@ -2,38 +2,53 @@
 
 ### Overview
 
-The purpose of this project is to solve the Harper Node Challenge using Harper Application and Components.
+The purpose of this project is to solve the Harper Node Challenge using Harper Components.
 
 ### Project Setup
 
-This project is setup to run with a single command that seeds the database and starts the server,
-using either values set with env variables or default values (default seed is 200, default port is 3000)
+This project assumes you have HarperDB installed globally
+Install with "npm install harperdb" locally if you prefer
 
 ```bash
 
-npm run dev
+npm install
+npm link harperdb
+npm run start
 
 ```
 
-### Stream Data
+### Seed Database
 
-Below are the route options for streaming the data from: http://localhost:3000 (or your env configured port)
+Below is the route for seeding the database from: http://localhost:9926
+You can set a custom seed amount in the request body: {"count": "number"}
+
+```bash
+
+# Seed User DB (default is 200 users for empty requests)
+POST "/SeedUsers/"
+
+```
+
+### Stream User Data
+
+Below is the route for streaming the data from: http://localhost:9926
+You can use custom sorting and filtering with query params on fields: id, firstName, lastName, email, age, active (boolean)
 
 ```bash
 
 # Stream all users
-GET "/"
+GET "/User/"
 
 # Stream first 100 users
-GET "/?limit=100"
+GET "/User/?limit(100)"
 
-# Stream from start key to limit
-GET "/?startKey=user:101&limit=50"
+# Stream by id from offset to limit
+GET "/User/?limit(5,100)"
 
 # Filtering by user age (range: 18-80)
-GET "/?ageMin=20"
-GET "/?ageMax=30"
-GET "/?ageMin=25&ageMax=70"
+GET "/User/?age=gte=20"
+GET "/User/?age=lte=30"
+GET "/User/?age=gte=25&age=lte=70"
 
 ```
 

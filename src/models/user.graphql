@@ -1,0 +1,9 @@
+# User table schema
+type User @table @export {
+	id: Int @primaryKey @indexed
+	firstName: String
+	lastName: String
+	email: String
+	age: Int
+	active: Boolean
+}
